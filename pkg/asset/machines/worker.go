@@ -5,20 +5,18 @@ import (
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
-	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	"github.com/openshift/installer/pkg/asset"
 	"github.com/openshift/installer/pkg/asset/ignition/machine"
 	"github.com/openshift/installer/pkg/asset/installconfig"
 	"github.com/openshift/installer/pkg/asset/machines/aws"
+	"github.com/openshift/installer/pkg/asset/machines/azure"
 	"github.com/openshift/installer/pkg/asset/machines/libvirt"
 	"github.com/openshift/installer/pkg/asset/machines/machineconfig"
 	"github.com/openshift/installer/pkg/asset/machines/openstack"
 	"github.com/openshift/installer/pkg/asset/rhcos"
 	awstypes "github.com/openshift/installer/pkg/types/aws"
 	awsdefaults "github.com/openshift/installer/pkg/types/aws/defaults"
+	azuretypes "github.com/openshift/installer/pkg/types/azure"
 	libvirttypes "github.com/openshift/installer/pkg/types/libvirt"
 	nonetypes "github.com/openshift/installer/pkg/types/none"
 	openstacktypes "github.com/openshift/installer/pkg/types/openstack"
@@ -32,6 +30,9 @@ const (
 
 	// workerUserDataFileName is the filename used for the worker user-data secret.
 	workerUserDataFileName = "99_openshift-cluster-api_worker-user-data-secret.yaml"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func defaultAWSMachinePoolPlatform() awstypes.MachinePool {
@@ -45,6 +46,10 @@ func defaultAWSMachinePoolPlatform() awstypes.MachinePool {
 
 func defaultLibvirtMachinePoolPlatform() libvirttypes.MachinePool {
 	return libvirttypes.MachinePool{}
+}
+
+func defaultAzureMachinePoolPlatform() azuretypes.MachinePool {
+	return azuretypes.MachinePool{}
 }
 
 func defaultOpenStackMachinePoolPlatform(flavor string) openstacktypes.MachinePool {
@@ -159,6 +164,19 @@ func (w *Worker) Generate(dependencies asset.Parents) error {
 		case nonetypes.Name, vspheretypes.Name:
 			// machines are managed directly by users
 			return nil
+		case azuretypes.Name:
+			mpool := defaultAzureMachinePoolPlatform()
+			mpool.Set(ic.Platform.Azure.DefaultMachinePlatform)
+			mpool.Set(pool.Platform.Azure)
+			pool.Platform.Azure = &mpool
+
+			sets, err := azure.MachineSets(clusterID.InfraID, ic, &pool, string(*rhcosImage), "worker", "worker-user-data")
+			if err != nil {
+				return errors.Wrap(err, "failed to create master machine objects")
+			}
+			for _, set := range sets {
+				machineSets = append(machineSets, set)
+			}
 		default:
 			return fmt.Errorf("invalid Platform")
 		}
