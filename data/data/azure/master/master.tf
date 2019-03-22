@@ -81,12 +81,6 @@ resource "azurerm_virtual_machine" "master" {
     version   = "latest"
   }
 
-  #  lifecycle {
-  #   # Ignore changes in the AMI which force recreation of the resource. This
-  #   # avoids accidental deletion of nodes whenever a new OS release comes out.
-  #   ignore_changes = ["ami"]
-  # }
-
   os_profile {
     computer_name  = "${var.cluster_id}-bootstrap-vm"
     admin_username = "king"
