@@ -27,7 +27,7 @@ module "bootstrap" {
 
 module "vnet" {
   source = "./vnet"
-  rg_name =   "${azurerm_resource_group.main.name}"
+  resource_group_name =   "${azurerm_resource_group.main.name}"
   cidr_block = "${var.machine_cidr}"
   cluster_id = "${var.cluster_id}"
   region     = "${var.azure_region}"
