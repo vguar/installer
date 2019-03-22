@@ -49,7 +49,6 @@ data "azurerm_storage_account_sas" "ignition" {
   }
 }
 
-
 resource "azurerm_storage_container" "ignition" {
   resource_group_name   = "${var.resource_group_name}"
   name                  = "ignition"
