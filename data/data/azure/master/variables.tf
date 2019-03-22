@@ -1,14 +1,3 @@
-
-# variable "availability_zones" {
-#   type        = "list"
-#   description = "List of the availability zones in which to create the masters. The length of this list must match instance_count."
-# }
-
-# variable "az_to_subnet_id" {
-#   type        = "map"
-#   description = "Map from availability zone name to the ID of the subnet in that availability zone"
-# }
-
 variable "region" {
   type        = "string"
   description = "The region for the deployment."
@@ -67,7 +56,7 @@ variable "os_volume_size" {
 variable "tags" {
   type        = "map"
   default     = {}
-  description = "AWS tags to be applied to created resources."
+  description = "tags to be applied to created resources."
 }
 
 variable "boot_diag_blob_endpoint" {

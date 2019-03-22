@@ -46,7 +46,7 @@ variable "boot_diag_blob_endpoint" {
 variable "tags" {
   type        = "map"
   default     = {}
-  description = "AWS tags to be applied to created resources."
+  description = "tags to be applied to created resources."
 }
 
 variable "volume_size" {
