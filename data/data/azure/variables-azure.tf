@@ -1,6 +1,6 @@
 variable "azure_config_version" {
   description = <<EOF
-(internal) This declares the version of the AWS configuration variables.
+(internal) This declares the version of the Azure configuration variables.
 It has no impact on generated assets but declares the version contract of the configuration.
 EOF
 
@@ -33,13 +33,6 @@ The this is the cluster_id, without the random suffix.
 EOF
 }
 
-
-
-# variable "azure_vm_image" {
-#   type        = "string"
-#   description = "VM Image for all nodes  Example: `image-foobar123`."
-# }
-
 variable "azure_extra_tags" {
   type = "map"
 
@@ -56,8 +49,3 @@ variable "azure_master_root_volume_size" {
   type        = "string"
   description = "The size of the volume in gigabytes for the root block device of master nodes."
 }
-
-# variable "azure_master_availability_zones" {
-#   type        = "list"
-#   description = "The availability zones in which to create the masters. The length of this list must match master_count."
-# }

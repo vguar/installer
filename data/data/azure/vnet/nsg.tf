@@ -63,7 +63,7 @@ resource "azurerm_network_security_rule" "master_ingress_kube_scheduler" {
   source_port_range           = "10251"
   destination_port_range      = "10251"
   source_address_prefix       = "*"
-  destination_address_prefix  = "VirtualNetwork" //TODO : restrict to masters
+  destination_address_prefix  = "VirtualNetwork"
   resource_group_name         = "${var.resource_group_name}"
   network_security_group_name = "${azurerm_network_security_group.master.name}" 
 }
