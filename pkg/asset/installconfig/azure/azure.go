@@ -16,6 +16,11 @@ import (
 	survey "gopkg.in/AlecAivazis/survey.v1"
 )
 
+const (
+	azurePublicCloudTenantID string = "72f988bf-86f1-41af-91ab-2d7cd011db47"
+	defaultRegion            string = "eastus"
+)
+
 // Platform collects azure-specific configuration.
 func Platform() (*azure.Platform, error) {
 	longRegions := make([]string, 0, len(validation.Regions))
@@ -28,10 +33,9 @@ func Platform() (*azure.Platform, error) {
 		return strings.SplitN(s, " ", 2)[0]
 	})
 
-	defaultRegion := "eastus"
 	_, ok := validation.Regions[defaultRegion]
 	if !ok {
-		panic(fmt.Sprintf("installer bug: invalid default azure region %q", defaultRegion))
+		return nil, errors.Errorf("installer bug: invalid default azure region %q", defaultRegion)
 	}
 
 	err := GetSession()
@@ -77,7 +81,7 @@ func GetSession() error {
 	return getCredentials()
 }
 
-type AzureCredentials struct {
+type azureCredentials struct {
 	SubscriptionID string `json:"subscriptionID,omitempty"`
 	ClientID       string `json:"clientID,omitempty"`
 	ClientSecret   string `json:"clientSecret,omitempty"`
@@ -128,11 +132,11 @@ func getCredentials() error {
 		return err
 	}
 
-	jsonCreds, err := json.Marshal(AzureCredentials{
+	jsonCreds, err := json.Marshal(azureCredentials{
 		SubscriptionID: subscriptionID,
 		ClientID:       clientID,
 		ClientSecret:   clientSecret,
-		TenantID:       "72f988bf-86f1-41af-91ab-2d7cd011db47",
+		TenantID:       azurePublicCloudTenantID,
 	})
 
 	logrus.Infof("Writing azure credentials to %q", path)
