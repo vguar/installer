@@ -16,12 +16,13 @@ import (
 const (
 	// TODO(flaper87): We're choosing to hardcode these values to make
 	// the environment more predictable. We expect there to a secret
-	// named `azure-credentials` and a cloud named `azure` in
+	// named `azure-credentials` and a cloud named `AzurePublicCloud` in
 	// the clouds file stored in this secret.
 	cloudsSecret          = "azure-credentials"
 	cloudsSecretNamespace = "kube-system"
 
 	// CloudName is a constant containing the name of the cloud used in the internal cloudsSecret
+	// TODO: parameterized this to support non-public cloud regions and azure stack
 	CloudName = "AzurePublicCloud"
 )
 
@@ -84,14 +85,11 @@ func provider(clusterID string, platform *azure.Platform, mpool *azure.MachinePo
 		},
 		Roles:    []azureprovider.MachineRole{azureprovider.MachineRole(azureprovider.Node)},
 		Location: platform.Region,
-		VMSize:   "Standard_DS2_V2",
-		// TODO(flaper87): Trunk support missing. Need to add it back
+		VMSize:   mpool.InstanceType,
 	}, nil
 }
 
 // ConfigMasters sets the PublicIP flag and assigns a set of load balancers to the given machines
 func ConfigMasters(machines []machineapi.Machine, clusterID string) {
-	/*for _, machine := range machines {
-		providerSpec := machine.Spec.ProviderSpec.Value.Object.(*openstackprovider.OpenstackProviderSpec)
-	}*/
+	//TODO
 }

@@ -7,7 +7,7 @@ type MachinePool struct {
 	Zones []string `json:"zones,omitempty"`
 
 	// InstanceType defines the azure instance type.
-	// eg. m4-large
+	// eg. Standard_DS_V2
 	InstanceType string `json:"type"`
 }
 
