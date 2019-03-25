@@ -63,6 +63,7 @@ func (i *Image) Generate(p asset.Parents) error {
 		osimage = "rhcos"
 	case none.Name, vsphere.Name:
 	case azure.Name:
+		//TODO(serbrech): change to right image once available.
 		osimage = "RedHat:osa:osa_311:311.82.20190222"
 	case none.Name:
 	default:

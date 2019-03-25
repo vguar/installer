@@ -17,8 +17,7 @@ import (
 )
 
 const (
-	azurePublicCloudTenantID string = "72f988bf-86f1-41af-91ab-2d7cd011db47"
-	defaultRegion            string = "eastus"
+	defaultRegion string = "eastus"
 )
 
 // Platform collects azure-specific configuration.
@@ -94,7 +93,7 @@ func getCredentials() error {
 		return nil
 	}
 
-	var subscriptionID, clientID, clientSecret string
+	var subscriptionID, tenantID, clientID, clientSecret string
 
 	err := survey.Ask([]*survey.Question{
 		{
@@ -104,6 +103,18 @@ func getCredentials() error {
 			},
 		},
 	}, &subscriptionID)
+	if err != nil {
+		return err
+	}
+
+	err = survey.Ask([]*survey.Question{
+		{
+			Prompt: &survey.Input{
+				Message: "azure tenant id",
+				Help:    "The azure tenant id to use for installation",
+			},
+		},
+	}, &tenantID)
 	if err != nil {
 		return err
 	}
@@ -136,7 +147,7 @@ func getCredentials() error {
 		SubscriptionID: subscriptionID,
 		ClientID:       clientID,
 		ClientSecret:   clientSecret,
-		TenantID:       azurePublicCloudTenantID,
+		TenantID:       tenantID,
 	})
 
 	logrus.Infof("Writing azure credentials to %q", path)
