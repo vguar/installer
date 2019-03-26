@@ -1,16 +1,16 @@
-
 resource "random_string" "storage_suffix" {
-  length = 5
-  upper = false
+  length  = 5
+  upper   = false
   special = false
+
   keepers = {
-        # Generate a new ID only when a new resource group is defined
-        resource_group = "${var.resource_group_name}"
-    }
+    # Generate a new ID only when a new resource group is defined
+    resource_group = "${var.resource_group_name}"
+  }
 }
 
 resource "azurerm_storage_account" "ignition" {
-  name = "ignitiondata${random_string.storage_suffix.result}"
+  name                     = "ignitiondata${random_string.storage_suffix.result}"
   resource_group_name      = "${var.resource_group_name}"
   location                 = "${var.region}"
   account_tier             = "Standard"
@@ -57,18 +57,17 @@ resource "azurerm_storage_container" "ignition" {
 }
 
 resource "local_file" "ignition_bootstrap" {
-    content     = "${var.ignition}"
-    filename = "${path.module}/ignition_bootstrap.ign"
+  content  = "${var.ignition}"
+  filename = "${path.module}/ignition_bootstrap.ign"
 }
 
 resource "azurerm_storage_blob" "ignition" {
-
-  name                    = "bootstrap.ign"
-  source                  = "${local_file.ignition_bootstrap.filename}"
-  resource_group_name     = "${var.resource_group_name}"
-  storage_account_name    = "${azurerm_storage_account.ignition.name}"
-  storage_container_name  = "${azurerm_storage_container.ignition.name}"
-  type = "block"
+  name                   = "bootstrap.ign"
+  source                 = "${local_file.ignition_bootstrap.filename}"
+  resource_group_name    = "${var.resource_group_name}"
+  storage_account_name   = "${azurerm_storage_account.ignition.name}"
+  storage_container_name = "${azurerm_storage_container.ignition.name}"
+  type                   = "block"
 }
 
 data "ignition_config" "redirect" {
@@ -85,22 +84,22 @@ resource "azurerm_network_interface" "bootstrap" {
   resource_group_name = "${var.resource_group_name}"
 
   ip_configuration {
-    subnet_id                               = "${var.subnet_id}"
-    name                                    = "bootstrap"
-    private_ip_address_allocation           = "Dynamic"
+    subnet_id                     = "${var.subnet_id}"
+    name                          = "bootstrap"
+    private_ip_address_allocation = "Dynamic"
   }
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "elb_bootstrap" {
-  network_interface_id = "${azurerm_network_interface.bootstrap.id}"
+  network_interface_id    = "${azurerm_network_interface.bootstrap.id}"
   backend_address_pool_id = "${var.elb_backend_pool_id}"
-  ip_configuration_name = "bootstrap" #must be the same as nic's ip configuration name.
+  ip_configuration_name   = "bootstrap"                                 #must be the same as nic's ip configuration name.
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "ilb_bootstrap" {
-  network_interface_id = "${azurerm_network_interface.bootstrap.id}"
+  network_interface_id    = "${azurerm_network_interface.bootstrap.id}"
   backend_address_pool_id = "${var.ilb_backend_pool_id}"
-  ip_configuration_name = "bootstrap" #must be the same as nic's ip configuration name.
+  ip_configuration_name   = "bootstrap"                                 #must be the same as nic's ip configuration name.
 }
 
 resource "azurerm_virtual_machine" "bootstrap" {
@@ -111,6 +110,7 @@ resource "azurerm_virtual_machine" "bootstrap" {
   vm_size               = "${var.vm_size}"
 
   delete_os_disk_on_termination = true
+
   storage_os_disk {
     name              = "bootstraposdisk"
     caching           = "ReadWrite"
@@ -130,7 +130,7 @@ resource "azurerm_virtual_machine" "bootstrap" {
     computer_name  = "${var.cluster_id}-bootstrap-vm"
     admin_username = "king"
     admin_password = "P@ssword1234!"
-    custom_data = "${data.ignition_config.redirect.rendered}"
+    custom_data    = "${data.ignition_config.redirect.rendered}"
   }
 
   os_profile_linux_config {
@@ -138,13 +138,11 @@ resource "azurerm_virtual_machine" "bootstrap" {
   }
 
   boot_diagnostics {
-    enabled = true
+    enabled     = true
     storage_uri = "${var.boot_diag_blob_endpoint}"
   }
 
   tags = "${merge(map(
     "Name", "${var.cluster_id}-bootstrap",
   ), var.tags)}"
-
 }
-

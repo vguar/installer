@@ -11,11 +11,11 @@ output "public_subnet_id" {
 }
 
 output "elb_backend_pool_id" {
-  value="${local.elb_backend_pool_id}"
+  value = "${local.elb_backend_pool_id}"
 }
 
 output "ilb_backend_pool_id" {
-  value="${local.ilb_backend_pool_id}"
+  value = "${local.ilb_backend_pool_id}"
 }
 
 output "external_lb_id" {

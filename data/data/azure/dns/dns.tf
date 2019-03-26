@@ -1,7 +1,7 @@
 resource "azurerm_dns_zone" "private" {
-  name                = "${var.base_domain}"
-  resource_group_name = "${var.resource_group_name}"
-  zone_type           = "Private"
+  name                           = "${var.base_domain}"
+  resource_group_name            = "${var.resource_group_name}"
+  zone_type                      = "Private"
   resolution_virtual_network_ids = ["${var.internal_dns_resolution_vnet_id}"]
 }
 

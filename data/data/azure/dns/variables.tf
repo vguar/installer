@@ -35,7 +35,6 @@ variable "internal_dns_resolution_vnet_id" {
 }
 
 variable "resource_group_name" {
-  type = "string"
+  type        = "string"
   description = "Resource group for the deployment"
 }
-

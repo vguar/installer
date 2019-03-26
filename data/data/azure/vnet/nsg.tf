@@ -26,18 +26,18 @@ resource "azurerm_subnet_network_security_group_association" "master" {
 }
 
 resource "azurerm_network_security_rule" "master_mcs" {
-  name                        = "master_mcs"
-  priority                    = 200
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "22623"
-  destination_port_range      = "22623"
-  source_address_prefix       = "Internet"
-  destination_address_prefix  = "VirtualNetwork"
-  resource_group_name         = "${var.resource_group_name}"
-  
-  network_security_group_name = "${azurerm_network_security_group.master.name}"  
+  name                       = "master_mcs"
+  priority                   = 200
+  direction                  = "Inbound"
+  access                     = "Allow"
+  protocol                   = "Tcp"
+  source_port_range          = "22623"
+  destination_port_range     = "22623"
+  source_address_prefix      = "Internet"
+  destination_address_prefix = "VirtualNetwork"
+  resource_group_name        = "${var.resource_group_name}"
+
+  network_security_group_name = "${azurerm_network_security_group.master.name}"
 }
 
 resource "azurerm_network_security_rule" "master_ingress_https" {
@@ -65,5 +65,5 @@ resource "azurerm_network_security_rule" "master_ingress_kube_scheduler" {
   source_address_prefix       = "*"
   destination_address_prefix  = "VirtualNetwork"
   resource_group_name         = "${var.resource_group_name}"
-  network_security_group_name = "${azurerm_network_security_group.master.name}" 
+  network_security_group_name = "${azurerm_network_security_group.master.name}"
 }
