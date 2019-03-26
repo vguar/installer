@@ -5,13 +5,13 @@
 locals {
   vnet_id = "${azurerm_virtual_network.new_vnet.id}"
 
-  subnet_ids    = "${azurerm_subnet.master_subnet.id}"
+  subnet_ids = "${azurerm_subnet.master_subnet.id}"
 
   lb_fqdn = "${azurerm_lb.external_lb.id}"
-  
-  elb_backend_pool_id ="${azurerm_lb_backend_address_pool.master_elb_pool.id}"
 
-  ilb_backend_pool_id ="${azurerm_lb_backend_address_pool.master_ilb_pool.id}"
+  elb_backend_pool_id = "${azurerm_lb_backend_address_pool.master_elb_pool.id}"
+
+  ilb_backend_pool_id = "${azurerm_lb_backend_address_pool.master_ilb_pool.id}"
 
   external_lb_id = "${azurerm_lb.external_lb.id}"
   internal_lb_id = "${azurerm_lb.internal.id}"
