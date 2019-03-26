@@ -60,7 +60,7 @@ variable "tags" {
 }
 
 variable "boot_diag_blob_endpoint" {
-  type = "string"
+  type        = "string"
   description = "the blob endpoint where machines should store their boot diagnostics."
 }
 

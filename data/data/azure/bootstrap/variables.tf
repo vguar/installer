@@ -30,16 +30,16 @@ variable "subnet_id" {
 
 variable "elb_backend_pool_id" {
   type        = "string"
-  description ="The external load balancer bakend pool id. used to attach the bootstrap NIC"
+  description = "The external load balancer bakend pool id. used to attach the bootstrap NIC"
 }
 
 variable "ilb_backend_pool_id" {
   type        = "string"
-  description ="The internal load balancer bakend pool id. used to attach the bootstrap NIC"
+  description = "The internal load balancer bakend pool id. used to attach the bootstrap NIC"
 }
 
 variable "boot_diag_blob_endpoint" {
-  type = "string"
+  type        = "string"
   description = "the blob endpoint where machines should store their boot diagnostics."
 }
 
