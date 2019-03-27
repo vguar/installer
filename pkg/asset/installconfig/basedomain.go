@@ -28,15 +28,23 @@ func (a *baseDomain) Dependencies() []asset.Asset {
 func (a *baseDomain) Generate(parents asset.Parents) error {
 	platform := &platform{}
 	parents.Get(platform)
-
-	if platform.AWS != nil {
-		var err error
-		a.BaseDomain, err = aws.GetBaseDomain()
-		cause := errors.Cause(err)
-		if !(aws.IsForbidden(cause) || request.IsErrorThrottle(cause)) {
-			return err
+	platformName := platform.Name()
+	switch platformName {
+		case aws.Name {
+			var err error
+			a.BaseDomain, err = aws.GetBaseDomain()
+			cause := errors.Cause(err)
+			if !(aws.IsForbidden(cause) || request.IsErrorThrottle(cause)) {
+				return err
+			}
+			logrus.Error(err)
 		}
-		logrus.Error(err)
+		case azure.Name:
+			platform.
+		case libvirt.Name, none.Name, openstack.Name, 
+		default:{
+			err = fmt.Errorf("unknown platform type %q", platform)
+		}
 	}
 
 	return survey.Ask([]*survey.Question{
