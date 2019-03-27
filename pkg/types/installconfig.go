@@ -99,7 +99,8 @@ type Platform struct {
 	// VSphere is the configuration used when installing on vSphere.
 	// +optional
 	VSphere *vsphere.Platform `json:"vsphere,omitempty"`
-	// OpenStack is the configuration used when installing on OpenStack.
+
+	// Azure is the configuration used when installing on Azure.
 	// +optional
 	Azure *azure.Platform `json:"azure,omitempty"`
 }
