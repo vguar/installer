@@ -4,12 +4,13 @@ package azure
 import (
 	"fmt"
 
-	machineapi "github.com/openshift/cluster-api/pkg/apis/machine/v1beta1"
-	"github.com/openshift/installer/pkg/types"
-	"github.com/openshift/installer/pkg/types/azure"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	machineapi "github.com/openshift/cluster-api/pkg/apis/machine/v1beta1"
+	"github.com/openshift/installer/pkg/types"
+	"github.com/openshift/installer/pkg/types/azure"
 	azureprovider "sigs.k8s.io/cluster-api-provider-azure/pkg/apis/azureprovider/v1alpha1"
 )
 

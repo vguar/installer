@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/pkg/errors"
+	survey "gopkg.in/AlecAivazis/survey.v1"
+
 	"github.com/openshift/installer/pkg/asset"
 	awsconfig "github.com/openshift/installer/pkg/asset/installconfig/aws"
 	azureconfig "github.com/openshift/installer/pkg/asset/installconfig/azure"
@@ -17,8 +20,6 @@ import (
 	"github.com/openshift/installer/pkg/types/none"
 	"github.com/openshift/installer/pkg/types/openstack"
 	"github.com/openshift/installer/pkg/types/vsphere"
-	"github.com/pkg/errors"
-	survey "gopkg.in/AlecAivazis/survey.v1"
 )
 
 // Platform is an asset that queries the user for the platform on which to install

@@ -6,6 +6,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/openshift/installer/pkg/asset"
 	"github.com/openshift/installer/pkg/asset/installconfig"
 	"github.com/openshift/installer/pkg/rhcos"
@@ -15,8 +18,6 @@ import (
 	"github.com/openshift/installer/pkg/types/none"
 	"github.com/openshift/installer/pkg/types/openstack"
 	"github.com/openshift/installer/pkg/types/vsphere"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 // Image is location of RHCOS image.
@@ -65,7 +66,6 @@ func (i *Image) Generate(p asset.Parents) error {
 	case azure.Name:
 		//TODO(serbrech): change to right image once available.
 		osimage = "RedHat:rhcos:rhcos_311:311.82.20190222"
-	case none.Name:
 	default:
 		return errors.New("invalid Platform")
 	}

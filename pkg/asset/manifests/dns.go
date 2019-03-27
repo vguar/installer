@@ -6,7 +6,11 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
+
 	configv1 "github.com/openshift/api/config/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/openshift/installer/pkg/asset"
 	"github.com/openshift/installer/pkg/asset/installconfig"
 	icaws "github.com/openshift/installer/pkg/asset/installconfig/aws"
@@ -16,8 +20,6 @@ import (
 	nonetypes "github.com/openshift/installer/pkg/types/none"
 	openstacktypes "github.com/openshift/installer/pkg/types/openstack"
 	vspheretypes "github.com/openshift/installer/pkg/types/vsphere"
-	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
