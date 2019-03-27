@@ -48,9 +48,3 @@ variable "tags" {
   default     = {}
   description = "tags to be applied to created resources."
 }
-
-variable "volume_size" {
-  type        = "string"
-  default     = "30"
-  description = "The volume size (in gibibytes) for the bootstrap node's root volume."
-}
