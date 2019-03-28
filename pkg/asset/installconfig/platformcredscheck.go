@@ -54,7 +54,7 @@ func (a *PlatformCredsCheck) Generate(dependencies asset.Parents) error {
 	case libvirt.Name, none.Name, vsphere.Name:
 		// no creds to check
 	case azure.Name:
-		err = azureconfig.GetSession()
+		_, err = azureconfig.GetSession()
 		if err != nil {
 			return errors.Wrap(err, "creating Azure session")
 		}

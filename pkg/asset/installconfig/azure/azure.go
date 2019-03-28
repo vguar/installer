@@ -9,8 +9,11 @@ import (
 	"sort"
 	"strings"
 
+	azureenv "github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure/go-autorest/autorest/azure/auth"
 	"github.com/openshift/installer/pkg/types/azure"
 	"github.com/openshift/installer/pkg/types/azure/validation"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	survey "gopkg.in/AlecAivazis/survey.v1"
@@ -19,6 +22,8 @@ import (
 const (
 	defaultRegion string = "eastus"
 )
+
+var authFileLocation = os.Getenv("HOME") + "/.azure/osServicePrincipal.json"
 
 // Platform collects azure-specific configuration.
 func Platform() (*azure.Platform, error) {
@@ -37,7 +42,7 @@ func Platform() (*azure.Platform, error) {
 		return nil, errors.Errorf("installer bug: invalid default azure region %q", defaultRegion)
 	}
 
-	err := GetSession()
+	_, err := GetSession()
 	if err != nil {
 		return nil, err
 	}
@@ -76,20 +81,45 @@ func Platform() (*azure.Platform, error) {
 
 // GetSession returns an azure session by checking credentials
 // and, if no creds are found, asks for them and stores them on disk in a config file
-func GetSession() error {
-	return getCredentials()
+func GetSession() (*azure.Session, error) {
+	err := getCredentials()
+	if err != nil {
+		return nil, err
+	}
+	return newSessionFromFile()
+}
+
+func newSessionFromFile() (*azure.Session, error) {
+	os.Setenv("AZURE_AUTH_LOCATION", authFileLocation)
+	authorizer, err := auth.NewAuthorizerFromFileWithResource(azureenv.PublicCloud.ResourceManagerEndpoint)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can't initialize authorizer")
+	}
+	authInfo := &azureCredentials{}
+	authBytes, err := ioutil.ReadFile(authFileLocation)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Can't read azure authorization file : %s", authFileLocation)
+	}
+	err = json.Unmarshal(authBytes, authInfo)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can't get authinfo")
+	}
+	session := azure.Session{
+		SubscriptionID: authInfo.SubscriptionID,
+		Authorizer:     authorizer,
+	}
+	return &session, nil
 }
 
 type azureCredentials struct {
-	SubscriptionID string `json:"subscriptionID,omitempty"`
-	ClientID       string `json:"clientID,omitempty"`
+	SubscriptionID string `json:"subscriptionId,omitempty"`
+	ClientID       string `json:"clientId,omitempty"`
 	ClientSecret   string `json:"clientSecret,omitempty"`
-	TenantID       string `json:"tenantID,omitempty"`
+	TenantID       string `json:"tenantId,omitempty"`
 }
 
 func getCredentials() error {
-	path := os.Getenv("HOME") + "/.azure/osServicePrincipal.json"
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
+	if _, err := os.Stat(authFileLocation); err == nil {
 		return nil
 	}
 
@@ -150,14 +180,16 @@ func getCredentials() error {
 		TenantID:       tenantID,
 	})
 
-	logrus.Infof("Writing azure credentials to %q", path)
-	err = os.MkdirAll(filepath.Dir(path), 0700)
+	logrus.Infof("Writing azure credentials to %q", authFileLocation)
+	err = os.MkdirAll(filepath.Dir(authFileLocation), 0700)
 	if err != nil {
+		logrus.Error(err)
 		return err
 	}
 
-	err = ioutil.WriteFile(path, jsonCreds, 0600)
+	err = ioutil.WriteFile(authFileLocation, jsonCreds, 0600)
 	if err != nil {
+		logrus.Error(err)
 		return err
 	}
 	return nil
