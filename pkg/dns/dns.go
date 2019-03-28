@@ -3,7 +3,6 @@ package dns
 import (
 	"errors"
 
-	azureconfig "github.com/openshift/installer/pkg/asset/installconfig/azure"
 	"github.com/openshift/installer/pkg/types/aws"
 	"github.com/openshift/installer/pkg/types/azure"
 	"github.com/openshift/installer/pkg/types/libvirt"
@@ -14,18 +13,14 @@ import (
 //ConfigProvider is an interface that provides means to fetch the DNS settings
 type ConfigProvider interface {
 	GetBaseDomain() (string, error)
-	GetPublicZone(name string) string //returns ID
+	GetPublicZone(name string) string
 }
 
 //NewDNSConfig is a factory method to return the platform specific implementation of dnsConfig
 func NewDNSConfig(platform string) (ConfigProvider, error) {
 	switch platform {
 	case azure.Name:
-		sess, err := azureconfig.GetSession()
-		if err != nil {
-			return nil, err
-		}
-		return &azure.DNSConfig{Session: *sess}, nil
+		return azure.NewDNSConfig()
 	case libvirt.Name, none.Name, openstack.Name, aws.Name:
 		return nil, nil //not using the common interface yet
 	case "fake":
