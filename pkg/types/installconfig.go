@@ -26,6 +26,8 @@ var (
 	// platforms presented to the user in the interactive wizard.
 	PlatformNames = []string{
 		aws.Name,
+		vsphere.Name,
+		azure.Name,
 	}
 	// HiddenPlatformNames is a slice with all the
 	// hidden-but-supported platform names. This list isn't presented
@@ -33,7 +35,6 @@ var (
 	HiddenPlatformNames = []string{
 		none.Name,
 		openstack.Name,
-		azure.Name,
 	}
 )
 
