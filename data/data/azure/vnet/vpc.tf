@@ -1,6 +1,7 @@
 locals {
   new_subnet_cidr_range = "${cidrsubnet(var.cidr_block,1,0)}"
   vnet_name             = "${azurerm_virtual_network.new_vnet.name}"
+  master_subnet_cidr_range= "${cidrsubnet(local.new_subnet_cidr_range, 3, 0)}"
 }
 
 resource "azurerm_virtual_network" "new_vnet" {
@@ -22,7 +23,7 @@ resource "azurerm_route_table" "route_table" {
 
 resource "azurerm_subnet" "master_subnet" {
   resource_group_name  = "${var.resource_group_name}"
-  address_prefix       = "${cidrsubnet(local.new_subnet_cidr_range, 3, 0)}"
+  address_prefix       = "${local.master_subnet_cidr_range}"
   virtual_network_name = "${local.vnet_name}"
   name                 = "${var.cluster_id}-subnet"
 }

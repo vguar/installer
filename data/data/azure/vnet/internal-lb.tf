@@ -8,6 +8,7 @@ resource "azurerm_lb" "internal" {
     name      = "internal"
     subnet_id = "${azurerm_subnet.master_subnet.id}"
     private_ip_address_allocation = "Static"
+    private_ip_address = "${cidrhost(local.master_subnet_cidr_range, -2)}"
   }
 }
 
