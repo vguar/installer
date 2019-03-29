@@ -7,6 +7,7 @@ resource "azurerm_lb" "internal" {
   frontend_ip_configuration {
     name      = "internal"
     subnet_id = "${azurerm_subnet.master_subnet.id}"
+    private_ip_address_allocation = "Static"
   }
 }
 
