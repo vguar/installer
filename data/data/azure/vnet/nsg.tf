@@ -3,18 +3,6 @@ resource "azurerm_network_security_group" "master" {
   location            = "${var.region}"
   resource_group_name = "${var.resource_group_name}"
 
-  security_rule {
-    name                       = "AllowSSH"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "22"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "VirtualNetwork"
-  }
-
   tags = "${merge(map(
     "Name", "${var.cluster_id}-master-nsg",
   ), var.tags)}"
@@ -23,6 +11,20 @@ resource "azurerm_network_security_group" "master" {
 resource "azurerm_subnet_network_security_group_association" "master" {
   subnet_id                 = "${azurerm_subnet.master_subnet.id}"
   network_security_group_id = "${azurerm_network_security_group.master.id}"
+}
+
+resource "azurerm_network_security_rule" "allow_ssh" {
+  name                       = "AllowSSH"
+  priority                   = 100
+  direction                  = "Inbound"
+  access                     = "Allow"
+  protocol                   = "Tcp"
+  source_port_range          = "22"
+  destination_port_range     = "22"
+  source_address_prefix      = "*"
+  destination_address_prefix = "VirtualNetwork"
+  resource_group_name        = "${var.resource_group_name}"
+  network_security_group_name = "${azurerm_network_security_group.master.name}"
 }
 
 resource "azurerm_network_security_rule" "master_mcs" {
@@ -36,7 +38,6 @@ resource "azurerm_network_security_rule" "master_mcs" {
   source_address_prefix      = "Internet"
   destination_address_prefix = "VirtualNetwork"
   resource_group_name        = "${var.resource_group_name}"
-
   network_security_group_name = "${azurerm_network_security_group.master.name}"
 }
 
