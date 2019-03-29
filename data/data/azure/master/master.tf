@@ -69,7 +69,7 @@ resource "azurerm_virtual_machine" "master" {
     managed_disk_type = "Standard_LRS"
     caching           = "ReadWrite"
     create_option     = "FromImage"
-    disk_size_gb      = 1023
+    disk_size_gb      = 64
   }
 
   storage_image_reference {
