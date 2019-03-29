@@ -65,7 +65,7 @@ resource "azurerm_virtual_machine" "master" {
   delete_os_disk_on_termination = true
 
   storage_os_disk {
-    #name              = "masterosdisk${count.index}"
+    name              = "masterosdisk${count.index}"
     managed_disk_type = "Standard_LRS"
     caching           = "ReadWrite"
     create_option     = "FromImage"
