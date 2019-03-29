@@ -15,7 +15,7 @@ variable "cluster_name" {
 }
 
 variable "base_domain" {
-  description = "The domain for the cluster that all DNS records must belong"
+  description = "The base domain used for public records"
   type        = "string"
 }
 
