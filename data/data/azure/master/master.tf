@@ -25,25 +25,6 @@ resource "azurerm_network_interface_backend_address_pool_association" "master_in
   ip_configuration_name   = "master-${count.index}"                                          #must be the same as nic's ip configuration name.
 }
 
-resource "azurerm_lb_nat_rule" "master" {
-  resource_group_name            = "${var.resource_group_name}"
-  enable_floating_ip             = false
-  loadbalancer_id                = "${var.external_lb_id}"
-  name                           = "natRuleSsh${count.index}"
-  protocol                       = "Tcp"
-  frontend_port                  = "${2200 + count.index}"
-  backend_port                   = 22
-  frontend_ip_configuration_name = "PublicIPAddress"
-  count                          = "${var.instance_count}"
-}
-
-resource "azurerm_network_interface_nat_rule_association" "master" {
-  count                 = "${var.instance_count}"
-  network_interface_id  = "${element(azurerm_network_interface.master.*.id, count.index)}"
-  ip_configuration_name = "master-${count.index}"
-  nat_rule_id           = "${element(azurerm_lb_nat_rule.master.*.id, count.index)}"
-}
-
 #TODO : make FD/UD configurable
 resource "azurerm_availability_set" "master" {
   name                         = "mater-as"
