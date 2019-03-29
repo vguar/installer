@@ -35,6 +35,24 @@ resource "azurerm_availability_set" "master" {
   platform_fault_domain_count  = 3                            # the available fault domain number depends on the region, so this needs to be configurable or dynamic
 }
 
+# resource "azurerm_managed_disk" "master" {
+#   count                = "${var.instance_count}"
+#   name                 = "master-osdisk-${count.index}"
+#   location             = "${var.region}"
+#   resource_group_name  = "${var.resource_group_name}"
+#   #os_type              = "linux"
+#   storage_account_type = "Standard_LRS"
+#   create_option        = "Import"
+#   source_uri           = "https://azos4.blob.core.windows.net/disks/rhcos-410.8.20190325.1-azure.vhd?sp=r&st=2019-03-28T22:17:13Z&se=2019-05-02T06:17:13Z&spr=https&sv=2018-03-28&sig=Iq9HzJRqlcfJKUOkiUzhwFCSrFVhESOGi6syYg1njV8%3D&sr=b"
+#   disk_size_gb         = 100
+# }
+
+data "azurerm_image" "image" {
+  name                = "rhcostestimage"
+  resource_group_name = "rhcos_images"
+}
+
+
 resource "azurerm_virtual_machine" "master" {
   count                 = "${var.instance_count}"
   name                  = "${var.cluster_id}-master-${count.index}"
@@ -47,19 +65,23 @@ resource "azurerm_virtual_machine" "master" {
   delete_os_disk_on_termination = true
 
   storage_os_disk {
-    name              = "masterosdisk${count.index}"
+    #name              = "masterosdisk${count.index}"
+    managed_disk_type = "Standard_LRS"
     caching           = "ReadWrite"
     create_option     = "FromImage"
-    managed_disk_type = "Premium_LRS"
-    disk_size_gb      = "${var.os_volume_size}"
+    disk_size_gb      = 1023
   }
 
   storage_image_reference {
-    publisher = "CoreOS"
-    offer     = "CoreOS"
-    sku       = "Alpha"
-    version   = "latest"
+    id="${data.azurerm_image.image.id}"
   }
+
+  # storage_image_reference {
+  #   publisher = "CoreOS"
+  #   offer     = "CoreOS"
+  #   sku       = "Alpha"
+  #   version   = "latest"
+  # }
 
   os_profile {
     computer_name  = "${var.cluster_id}-bootstrap-vm"

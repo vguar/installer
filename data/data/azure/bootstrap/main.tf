@@ -102,6 +102,11 @@ resource "azurerm_network_interface_backend_address_pool_association" "ilb_boots
   ip_configuration_name   = "bootstrap"                                 #must be the same as nic's ip configuration name.
 }
 
+data "azurerm_image" "image" {
+  name                = "rhcostestimage"
+  resource_group_name = "rhcos_images"
+}
+
 resource "azurerm_virtual_machine" "bootstrap" {
   name                  = "${var.cluster_id}-bootstrap"
   location              = "${var.region}"
@@ -112,18 +117,15 @@ resource "azurerm_virtual_machine" "bootstrap" {
   delete_os_disk_on_termination = true
 
   storage_os_disk {
-    name              = "bootstraposdisk"
+    #name              = "masterosdisk${count.index}"
+    managed_disk_type = "Standard_LRS"
     caching           = "ReadWrite"
     create_option     = "FromImage"
-    managed_disk_type = "Premium_LRS"
-    disk_size_gb      = 100
+    disk_size_gb      = 1023
   }
 
   storage_image_reference {
-    publisher = "CoreOS"
-    offer     = "CoreOS"
-    sku       = "Alpha"
-    version   = "latest"
+    id="${data.azurerm_image.image.id}"
   }
 
   os_profile {
