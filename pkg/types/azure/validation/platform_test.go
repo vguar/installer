@@ -39,7 +39,7 @@ func TestValidatePlatform(t *testing.T) {
 		{
 			name: "invalid machine pool",
 			platform: &azure.Platform{
-				Region:                 "eastus",
+				Region:                 "",
 				DefaultMachinePlatform: &azure.MachinePool{},
 			},
 			valid: false,
