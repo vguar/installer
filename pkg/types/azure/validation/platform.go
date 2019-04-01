@@ -12,8 +12,8 @@ var (
 	// the short name of the region. The value of the map is the long
 	// name of the region.
 	Regions = map[string]string{
-		"eastus": "East US",
-		"westus": "West US",
+		"eastus":  "East US",
+		"westus2": "West US 2",
 	}
 
 	validRegionValues = func() []string {
