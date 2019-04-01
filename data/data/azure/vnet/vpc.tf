@@ -1,7 +1,7 @@
 locals {
-  new_subnet_cidr_range = "${cidrsubnet(var.cidr_block,1,0)}"
-  vnet_name             = "${azurerm_virtual_network.new_vnet.name}"
-  master_subnet_cidr_range= "${cidrsubnet(local.new_subnet_cidr_range, 3, 0)}"
+  new_subnet_cidr_range    = "${cidrsubnet(var.cidr_block,1,0)}"
+  vnet_name                = "${azurerm_virtual_network.new_vnet.name}"
+  master_subnet_cidr_range = "${cidrsubnet(local.new_subnet_cidr_range, 3, 0)}"
 }
 
 resource "azurerm_virtual_network" "new_vnet" {

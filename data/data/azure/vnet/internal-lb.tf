@@ -5,10 +5,10 @@ resource "azurerm_lb" "internal" {
   location            = "${var.region}"
 
   frontend_ip_configuration {
-    name      = "internal"
-    subnet_id = "${azurerm_subnet.master_subnet.id}"
+    name                          = "internal"
+    subnet_id                     = "${azurerm_subnet.master_subnet.id}"
     private_ip_address_allocation = "Static"
-    private_ip_address = "${cidrhost(local.master_subnet_cidr_range, -2)}"
+    private_ip_address            = "${cidrhost(local.master_subnet_cidr_range, -2)}"
   }
 }
 
