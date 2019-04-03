@@ -22,8 +22,8 @@ output "external_lb_id" {
   value = "${local.external_lb_id}"
 }
 
-output "external_lb_dns_label" {
-  value = "${data.azurerm_public_ip.cluster_public_ip.domain_name_label}"
+output "external_lb_pip_fqdn" {
+  value = "${data.azurerm_public_ip.cluster_public_ip.fqdn}"
 }
 
 output "internal_lb_ip_address" {
