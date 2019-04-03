@@ -54,10 +54,10 @@ module "dns" {
   source                          = "./dns"
   cluster_domain                  = "${var.cluster_domain}"
   base_domain                     = "${var.base_domain}"
-  cluster_name                    = "${var.cluster_name}"
-  external_lb_dns_label           = "${module.vnet.external_lb_dns_label}"
+  external_lb_fqdn                = "${module.vnet.external_lb_pip_fqdn}"
   internal_lb_ipaddress           = "${module.vnet.internal_lb_ip_address}"
   resource_group_name             = "${azurerm_resource_group.main.name}"
+  base_domain_resource_group_name  = "${var.azure_base_domain_resource_group_name}"
   internal_dns_resolution_vnet_id = "${module.vnet.vnet_id}"
 }
 

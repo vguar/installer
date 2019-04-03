@@ -9,18 +9,18 @@ variable "cluster_domain" {
   type        = "string"
 }
 
-variable "cluster_name" {
-  description = "The name for the cluster without the random suffix"
-  type        = "string"
-}
-
 variable "base_domain" {
   description = "The base domain used for public records"
   type        = "string"
 }
 
-variable "external_lb_dns_label" {
-  description = "External API's LB DNS name"
+variable "base_domain_resource_group_name" {
+  description = "The resource group where the base domain is"
+  type        = "string"
+}
+
+variable "external_lb_fqdn" {
+  description = "External API's LB fqdn"
   type        = "string"
 }
 
