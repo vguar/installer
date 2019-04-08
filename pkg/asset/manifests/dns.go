@@ -14,7 +14,9 @@ import (
 	"github.com/openshift/installer/pkg/asset"
 	"github.com/openshift/installer/pkg/asset/installconfig"
 	icaws "github.com/openshift/installer/pkg/asset/installconfig/aws"
+	icazure "github.com/openshift/installer/pkg/asset/installconfig/azure"
 	awstypes "github.com/openshift/installer/pkg/types/aws"
+	azuretypes "github.com/openshift/installer/pkg/types/azure"
 	libvirttypes "github.com/openshift/installer/pkg/types/libvirt"
 	nonetypes "github.com/openshift/installer/pkg/types/none"
 	openstacktypes "github.com/openshift/installer/pkg/types/openstack"
@@ -69,8 +71,9 @@ func (d *DNS) Generate(dependencies asset.Parents) error {
 			BaseDomain: installConfig.Config.ClusterDomain(),
 		},
 	}
+	platformName := installConfig.Config.Platform.Name()
 
-	switch installConfig.Config.Platform.Name() {
+	switch platformName {
 	case awstypes.Name:
 		zone, err := icaws.GetPublicZone(installConfig.Config.BaseDomain)
 		if err != nil {
@@ -81,6 +84,19 @@ func (d *DNS) Generate(dependencies asset.Parents) error {
 			fmt.Sprintf("kubernetes.io/cluster/%s", clusterID.InfraID): "owned",
 			"Name": fmt.Sprintf("%s-int", clusterID.InfraID),
 		}}
+	case azuretypes.Name:
+		dnsConfig, err := icazure.NewDNSConfig()
+		if err != nil {
+			return err
+		}
+
+		//currently, this guesses the azure resource IDs from known parameter.
+		publicZoneID := dnsConfig.GetDNSZoneID(installConfig.Config.Azure.BaseDomainResourceGroupName, installConfig.Config.BaseDomain)
+		clusterResourceGroupName := clusterID.InfraID + "-rg"
+		privateZoneID := dnsConfig.GetDNSZoneID(clusterResourceGroupName, installConfig.Config.ClusterDomain())
+
+		config.Spec.PublicZone = &configv1.DNSZone{ID: publicZoneID}
+		config.Spec.PrivateZone = &configv1.DNSZone{ID: privateZoneID}
 	case libvirttypes.Name, openstacktypes.Name, nonetypes.Name, vspheretypes.Name:
 	default:
 		return errors.New("invalid Platform")
