@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/Azure/go-autorest/autorest/to"
 
@@ -71,13 +72,14 @@ func Platform() (*azure.Platform, error) {
 }
 
 func getRegions() (map[string]string, error) {
-	ctx := context.TODO()
 	session, err := GetSession()
 	if err != nil {
 		return nil, err
 	}
 	client := azsub.NewClient()
 	client.Authorizer = session.Authorizer
+	ctx, cancel := context.WithTimeout(context.TODO(), 30*time.Second)
+	defer cancel()
 	locations, err := client.ListLocations(ctx, session.SubscriptionID)
 	if err != nil {
 		return nil, err

@@ -102,6 +102,6 @@ func (a *platform) queryUserForPlatform() (platform string, err error) {
 	return
 }
 
-func (a *platform) CurrentPlatformName() string {
+func (a *platform) CurrentName() string {
 	return a.Platform.Name()
 }

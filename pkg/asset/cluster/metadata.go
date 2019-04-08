@@ -66,7 +66,7 @@ func (m *Metadata) Generate(parents asset.Parents) (err error) {
 	case openstacktypes.Name:
 		metadata.ClusterPlatformMetadata.OpenStack = openstack.Metadata(clusterID.InfraID, installConfig.Config)
 	case azuretypes.Name:
-		metadata.ClusterPlatformMetadata.Azure = azure.Metadata(clusterID.UUID, clusterID.InfraID, installConfig.Config)
+		metadata.ClusterPlatformMetadata.Azure = azure.Metadata(installConfig.Config)
 	case nonetypes.Name, vspheretypes.Name:
 	default:
 		return errors.Errorf("no known platform")

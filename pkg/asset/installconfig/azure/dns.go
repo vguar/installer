@@ -3,6 +3,7 @@ package azure
 import (
 	"context"
 	"fmt"
+	"time"
 
 	azdns "github.com/Azure/azure-sdk-for-go/profiles/latest/dns/mgmt/dns"
 	"github.com/Azure/go-autorest/autorest/to"
@@ -114,14 +115,16 @@ func newZonesClient(session *Session) ZonesGetter {
 
 //GetAllPublicZones get all public zones from the current subscription
 func (client *ZonesClient) GetAllPublicZones() (map[string]string, error) {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(context.TODO(), 30*time.Second)
+	defer cancel()
 	allZones := map[string]string{}
 	for zonesPage, err := client.azureClient.List(ctx, to.Int32Ptr(100)); zonesPage.NotDone(); err = zonesPage.NextWithContext(ctx) {
 		if err != nil {
 			return nil, err
 		}
 		//TODO: filter out private zone and show only public zones.
-		//the property is present in the REST api response, but not mapped yet in the SDK
+		//the property is present in the REST api response, but not mapped yet in the stable SDK (present in preview)
+		//https://github.com/Azure/azure-sdk-for-go/blob/07f918ba2d513bbc5b75bc4caac845e10f27449e/services/preview/dns/mgmt/2018-03-01-preview/dns/models.go#L857
 		for _, zone := range zonesPage.Values() {
 			allZones[to.String(zone.Name)] = to.String(zone.ID)
 		}

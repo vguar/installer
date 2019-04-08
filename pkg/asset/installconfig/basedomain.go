@@ -36,7 +36,7 @@ func (a *baseDomain) Dependencies() []asset.Asset {
 func (a *baseDomain) Generate(parents asset.Parents) error {
 	platform := &platform{}
 	parents.Get(platform)
-	platformName := platform.CurrentPlatformName()
+	platformName := platform.CurrentName()
 	switch platformName {
 	case aws.Name:
 		var err error
