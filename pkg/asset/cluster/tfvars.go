@@ -13,6 +13,7 @@ import (
 	"github.com/openshift/installer/pkg/asset/rhcos"
 	"github.com/openshift/installer/pkg/tfvars"
 	awstfvars "github.com/openshift/installer/pkg/tfvars/aws"
+	azuretfvars "github.com/openshift/installer/pkg/tfvars/azure"
 	libvirttfvars "github.com/openshift/installer/pkg/tfvars/libvirt"
 	openstacktfvars "github.com/openshift/installer/pkg/tfvars/openstack"
 	"github.com/openshift/installer/pkg/types/aws"
@@ -137,7 +138,18 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 			Data:     data,
 		})
 	case azure.Name:
-		//TODO(serbrech): call generate azure tfvars, relying on MachineProviderConfig once available
+		//TODO(serbrech): rely on azure MachineProviderConfig once available
+		data, err := azuretfvars.TFVars(
+			installConfig.Config.Azure.Region,
+			installConfig.Config.Azure.BaseDomainResourceGroupName,
+		)
+		if err != nil {
+			return errors.Wrapf(err, "failed to get %s Terraform variables", platform)
+		}
+		t.FileList = append(t.FileList, &asset.File{
+			Filename: fmt.Sprintf(TfPlatformVarsFileName, platform),
+			Data:     data,
+		})
 	case libvirt.Name:
 		masters, err := mastersAsset.Machines()
 		if err != nil {
