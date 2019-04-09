@@ -20,7 +20,7 @@ func TFVars(region string, baseDomainResourceGroupName string) ([]byte, error) {
 	var volumeSize int64
 	volumeSize = 30
 	cfg := &config{
-		Region:                      region,
+		Region: region,
 		BaseDomainResourceGroupName: baseDomainResourceGroupName,
 		ExtraTags:                   map[string]string{},
 		BootstrapInstanceType:       defaults.InstanceClass(region),
