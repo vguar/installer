@@ -1,3 +1,7 @@
+locals {
+  bootstrap_nic_ip_configuration_name = "bootstrap-nic-ip"
+}
+
 resource "random_string" "storage_suffix" {
   length  = 5
   upper   = false
@@ -34,8 +38,8 @@ data "azurerm_storage_account_sas" "ignition" {
     file  = false
   }
 
-  start  = "${substr(timestamp(), 0, 10)}"
-  expiry = "${substr(timeadd(timestamp(), "24h"), 0, 10)}"
+  start  = "${timestamp()}"
+  expiry = "${timeadd(timestamp(), "1h")}"
 
   permissions {
     read    = true
@@ -83,28 +87,25 @@ resource "azurerm_network_interface" "bootstrap" {
 
   ip_configuration {
     subnet_id                     = "${var.subnet_id}"
-    name                          = "bootstrap"
+    name                          = "${local.bootstrap_nic_ip_configuration_name}"
     private_ip_address_allocation = "Static"
     private_ip_address            = "${var.ip_address}"
   }
 }
 
-resource "azurerm_network_interface_backend_address_pool_association" "elb_bootstrap" {
+resource "azurerm_network_interface_backend_address_pool_association" "public_lb_bootstrap" {
   network_interface_id    = "${azurerm_network_interface.bootstrap.id}"
   backend_address_pool_id = "${var.elb_backend_pool_id}"
-  ip_configuration_name   = "bootstrap"                                 #must be the same as nic's ip configuration name.
+  ip_configuration_name   = "${local.bootstrap_nic_ip_configuration_name}"
 }
 
-resource "azurerm_network_interface_backend_address_pool_association" "ilb_bootstrap" {
+resource "azurerm_network_interface_backend_address_pool_association" "internal_lb_bootstrap" {
   network_interface_id    = "${azurerm_network_interface.bootstrap.id}"
   backend_address_pool_id = "${var.ilb_backend_pool_id}"
-  ip_configuration_name   = "bootstrap"                                 #must be the same as nic's ip configuration name.
+  ip_configuration_name   = "${local.bootstrap_nic_ip_configuration_name}"
 }
 
-data "azurerm_image" "image" {
-  name                = "rhcostestimage"
-  resource_group_name = "rhcos_images"
-}
+data "azurerm_subscription" "current" {}
 
 resource "azurerm_virtual_machine" "bootstrap" {
   name                  = "${var.cluster_id}-bootstrap"
@@ -113,7 +114,13 @@ resource "azurerm_virtual_machine" "bootstrap" {
   network_interface_ids = ["${azurerm_network_interface.bootstrap.id}"]
   vm_size               = "${var.vm_size}"
 
-  delete_os_disk_on_termination = true
+  delete_os_disk_on_termination    = true
+  delete_data_disks_on_termination = true
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = ["${var.identity}"]
+  }
 
   storage_os_disk {
     name              = "${var.cluster_id}-bootstrap_OSDisk" # os disk name needs to match cluster-api convention
@@ -124,12 +131,12 @@ resource "azurerm_virtual_machine" "bootstrap" {
   }
 
   storage_image_reference {
-    id = "${data.azurerm_image.image.id}"
+    id = "${data.azurerm_subscription.current.id}${var.vm_image}"
   }
 
   os_profile {
     computer_name  = "${var.cluster_id}-bootstrap-vm"
-    admin_username = "king"
+    admin_username = "core"
     admin_password = "P@ssword1234!"
     custom_data    = "${data.ignition_config.redirect.rendered}"
   }
@@ -142,8 +149,4 @@ resource "azurerm_virtual_machine" "bootstrap" {
     enabled     = true
     storage_uri = "${var.boot_diag_blob_endpoint}"
   }
-
-  tags = "${merge(map(
-    "Name", "${var.cluster_id}-bootstrap",
-  ), var.tags)}"
 }

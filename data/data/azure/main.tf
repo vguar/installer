@@ -3,7 +3,8 @@ locals {
     "kubernetes.io_cluster.${var.cluster_id}", "owned"
   ), var.azure_extra_tags)}"
 
-  master_subnet_cidr = "${cidrsubnet(var.machine_cidr, 3, 0)}"    #master subnet is a smaller subnet within the new subnet. i.e from /21 to /24
+  master_subnet_cidr = "${cidrsubnet(var.machine_cidr, 3, 0)}"    #master subnet is a smaller subnet within the vnet. i.e from /21 to /24
+  node_subnet_cidr   = "${cidrsubnet(var.machine_cidr, 3, 1)}"    #node subnet is a smaller subnet within the vnet. i.e from /21 to /24
   bootstrap_ip       = "${cidrhost(local.master_subnet_cidr, 4)}" #azure reserves the 3 first ips in a subnet, so we start at 4
 }
 
@@ -12,16 +13,17 @@ provider "azurerm" {
 }
 
 module "bootstrap" {
-  source              = "./bootstrap"
-  resource_group_name = "${azurerm_resource_group.main.name}"
-  region              = "${var.azure_region}"
-  vm_size             = "${var.azure_bootstrap_vm_type}"
-
+  source                  = "./bootstrap"
+  resource_group_name     = "${azurerm_resource_group.main.name}"
+  region                  = "${var.azure_region}"
+  vm_size                 = "${var.azure_bootstrap_vm_type}"
+  vm_image                = "${var.azure_image_id}"
+  identity                = "${azurerm_user_assigned_identity.main.id}"
   cluster_id              = "${var.cluster_id}"
   ignition                = "${var.ignition_bootstrap}"
   subnet_id               = "${module.vnet.public_subnet_id}"
-  elb_backend_pool_id     = "${module.vnet.elb_backend_pool_id}"
-  ilb_backend_pool_id     = "${module.vnet.ilb_backend_pool_id}"
+  elb_backend_pool_id     = "${module.vnet.public_lb_backend_pool_id}"
+  ilb_backend_pool_id     = "${module.vnet.internal_lb_backend_pool_id}"
   tags                    = "${local.tags}"
   boot_diag_blob_endpoint = "${azurerm_storage_account.bootdiag.primary_blob_endpoint}"
   ip_address              = "${local.bootstrap_ip}"
@@ -32,10 +34,10 @@ module "vnet" {
   resource_group_name = "${azurerm_resource_group.main.name}"
   vnet_cidr           = "${var.machine_cidr}"
   master_subnet_cidr  = "${local.master_subnet_cidr}"
+  node_subnet_cidr    = "${local.node_subnet_cidr}"
   cluster_id          = "${var.cluster_id}"
   region              = "${var.azure_region}"
   dns_label           = "${var.cluster_id}"
-  tags                = "${local.tags}"
 }
 
 module "master" {
@@ -44,14 +46,15 @@ module "master" {
   cluster_id              = "${var.cluster_id}"
   region                  = "${var.azure_region}"
   vm_size                 = "${var.azure_master_vm_type}"
+  vm_image                = "${var.azure_image_id}"
+  identity                = "${azurerm_user_assigned_identity.main.id}"
   ignition                = "${var.ignition_master}"
-  external_lb_id          = "${module.vnet.external_lb_id}"
-  elb_backend_pool_id     = "${module.vnet.elb_backend_pool_id}"
-  ilb_backend_pool_id     = "${module.vnet.ilb_backend_pool_id}"
+  external_lb_id          = "${module.vnet.public_lb_id}"
+  elb_backend_pool_id     = "${module.vnet.public_lb_backend_pool_id}"
+  ilb_backend_pool_id     = "${module.vnet.internal_lb_backend_pool_id}"
   subnet_id               = "${module.vnet.public_subnet_id}"
   master_subnet_cidr      = "${local.master_subnet_cidr}"
   instance_count          = "${var.master_count}"
-  tags                    = "${local.tags}"
   boot_diag_blob_endpoint = "${azurerm_storage_account.bootdiag.primary_blob_endpoint}"
   os_volume_size          = "${var.azure_master_root_volume_size}"
 }
@@ -69,7 +72,7 @@ module "dns" {
   etcd_ip_addresses               = "${module.master.ip_addresses}"
 }
 
-resource "random_string" "resource_group_suffix" {
+resource "random_string" "storage_suffix" {
   length  = 5
   upper   = false
   special = false
@@ -78,12 +81,26 @@ resource "random_string" "resource_group_suffix" {
 resource "azurerm_resource_group" "main" {
   name     = "${var.cluster_id}-rg"
   location = "${var.azure_region}"
+  tags     = "${local.tags}"
 }
 
 resource "azurerm_storage_account" "bootdiag" {
-  name                     = "bootdiagmasters${random_string.resource_group_suffix.result}"
+  name                     = "bootdiagmasters${random_string.storage_suffix.result}"
   resource_group_name      = "${azurerm_resource_group.main.name}"
   location                 = "${var.azure_region}"
   account_tier             = "Standard"
   account_replication_type = "LRS"
+}
+
+resource "azurerm_user_assigned_identity" "main" {
+  resource_group_name = "${azurerm_resource_group.main.name}"
+  location            = "${azurerm_resource_group.main.location}"
+
+  name = "${var.cluster_id}-identity"
+}
+
+resource "azurerm_role_assignment" "main" {
+  scope                = "${azurerm_resource_group.main.id}"
+  role_definition_name = "Contributor"
+  principal_id         = "${azurerm_user_assigned_identity.main.principal_id}"
 }

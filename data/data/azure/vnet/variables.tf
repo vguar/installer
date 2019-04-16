@@ -7,6 +7,11 @@ variable "master_subnet_cidr" {
   description = "The subnet for the masters"
 }
 
+variable "node_subnet_cidr" {
+  type        = "string"
+  description = "The subnet for the workers"
+}
+
 variable "resource_group_name" {
   type        = "string"
   description = "Resource group for the deployment"

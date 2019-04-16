@@ -28,13 +28,15 @@ resource "azurerm_network_interface_backend_address_pool_association" "master_in
 
 #TODO : make FD/UD configurable
 resource "azurerm_availability_set" "master" {
-  name                         = "mater-as"
+  name                         = "controlplane-as"
   location                     = "${var.region}"
   resource_group_name          = "${var.resource_group_name}"
   managed                      = true
   platform_update_domain_count = 5
   platform_fault_domain_count  = 3                            # the available fault domain number depends on the region, so this needs to be configurable or dynamic
 }
+
+data "azurerm_subscription" "current" {}
 
 resource "azurerm_virtual_machine" "master" {
   count                 = "${var.instance_count}"
@@ -47,8 +49,13 @@ resource "azurerm_virtual_machine" "master" {
 
   delete_os_disk_on_termination = true
 
+  identity {
+    type         = "UserAssigned"
+    identity_ids = ["${var.identity}"]
+  }
+
   storage_os_disk {
-    name              = "masterosdisk${count.index}"
+    name              = "${var.cluster_id}-master-${count.index}_OSDisk" # os disk name needs to match cluster-api convention
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Premium_LRS"
@@ -56,15 +63,14 @@ resource "azurerm_virtual_machine" "master" {
   }
 
   storage_image_reference {
-    publisher = "CoreOS"
-    offer     = "CoreOS"
-    sku       = "Alpha"
-    version   = "latest"
+    id = "${data.azurerm_subscription.current.id}${var.vm_image}"
   }
 
+  //we don't provide a ssh key, because it is set with ignition. 
+  //it is required to provide at least 1 auth method to deploy a linux vm
   os_profile {
-    computer_name  = "${var.cluster_id}-bootstrap-vm"
-    admin_username = "king"
+    computer_name  = "${var.cluster_id}-master-${count.index}"
+    admin_username = "core"
     admin_password = "P@ssword1234!"
     custom_data    = "${var.ignition}"
   }
@@ -77,8 +83,4 @@ resource "azurerm_virtual_machine" "master" {
     enabled     = true
     storage_uri = "${var.boot_diag_blob_endpoint}"
   }
-
-  tags = "${merge(map(
-    "Name", "${var.cluster_id}-master",
-  ), var.tags)}"
 }

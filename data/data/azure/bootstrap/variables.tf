@@ -3,6 +3,11 @@ variable "vm_size" {
   description = "The SKU ID for the bootstrap node."
 }
 
+variable "vm_image" {
+  type        = "string"
+  description = "The resource id of the vm image used for bootstrap."
+}
+
 variable "region" {
   type        = "string"
   description = "The region for the deployment."
@@ -16,6 +21,11 @@ variable "resource_group_name" {
 variable "cluster_id" {
   type        = "string"
   description = "The identifier for the cluster."
+}
+
+variable "identity" {
+  type        = "string"
+  description = "The user assigned identity id for the vm."
 }
 
 variable "ignition" {
