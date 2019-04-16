@@ -43,3 +43,8 @@ variable "azure_base_domain_resource_group_name" {
   type        = "string"
   description = "The resource group that contains the dns zone used as base domain for the cluster."
 }
+
+variable "azure_image_id" {
+  type        = "string"
+  description = "The resource id of the vm image used for all node."
+}

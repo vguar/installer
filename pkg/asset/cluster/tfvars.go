@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	awsprovider "sigs.k8s.io/cluster-api-provider-aws/pkg/apis/awsproviderconfig/v1beta1"
+	azureprovider "sigs.k8s.io/cluster-api-provider-azure/pkg/apis/azureprovider/v1alpha1"
 	openstackprovider "sigs.k8s.io/cluster-api-provider-openstack/pkg/apis/openstackproviderconfig/v1alpha1"
 )
 
@@ -138,10 +139,17 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 			Data:     data,
 		})
 	case azure.Name:
-		//TODO(serbrech): rely on azure MachineProviderConfig once available
+		masters, err := mastersAsset.Machines()
+		if err != nil {
+			return err
+		}
+		masterConfigs := make([]*azureprovider.AzureMachineProviderSpec, len(masters))
+		for i, m := range masters {
+			masterConfigs[i] = m.Spec.ProviderSpec.Value.Object.(*azureprovider.AzureMachineProviderSpec)
+		}
 		data, err := azuretfvars.TFVars(
-			installConfig.Config.Azure.Region,
 			installConfig.Config.Azure.BaseDomainResourceGroupName,
+			masterConfigs,
 		)
 		if err != nil {
 			return errors.Wrapf(err, "failed to get %s Terraform variables", platform)

@@ -16,6 +16,16 @@ variable "vm_size" {
   type = "string"
 }
 
+variable "vm_image" {
+  type        = "string"
+  description = "The resource id of the vm image used for masters."
+}
+
+variable "identity" {
+  type        = "string"
+  description = "The user assigned identity id for the vm."
+}
+
 variable "instance_count" {
   type = "string"
 }
