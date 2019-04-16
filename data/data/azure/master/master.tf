@@ -28,12 +28,17 @@ resource "azurerm_network_interface_backend_address_pool_association" "master_in
 
 #TODO : make FD/UD configurable
 resource "azurerm_availability_set" "master" {
-  name                         = "mater-as"
+  name                         = "controlplane-as"
   location                     = "${var.region}"
   resource_group_name          = "${var.resource_group_name}"
   managed                      = true
   platform_update_domain_count = 5
   platform_fault_domain_count  = 3                            # the available fault domain number depends on the region, so this needs to be configurable or dynamic
+}
+
+data "azurerm_image" "image" {
+  name                = "rhcostestimage"
+  resource_group_name = "rhcos_images"
 }
 
 resource "azurerm_virtual_machine" "master" {
@@ -47,8 +52,13 @@ resource "azurerm_virtual_machine" "master" {
 
   delete_os_disk_on_termination = true
 
+  identity {
+    type         = "UserAssigned"
+    identity_ids = ["${var.identity}"]
+  }
+
   storage_os_disk {
-    name              = "masterosdisk${count.index}"
+    name              = "${var.cluster_id}-master-${count.index}_OSDisk" # os disk name needs to match cluster-api convention
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Premium_LRS"
@@ -56,29 +66,21 @@ resource "azurerm_virtual_machine" "master" {
   }
 
   storage_image_reference {
-    publisher = "CoreOS"
-    offer     = "CoreOS"
-    sku       = "Alpha"
-    version   = "latest"
+    id = "${data.azurerm_image.image.id}"
   }
 
   os_profile {
-    computer_name  = "${var.cluster_id}-bootstrap-vm"
-    admin_username = "king"
-    admin_password = "P@ssword1234!"
+    computer_name  = "${var.cluster_id}-master-${count.index}"
+    admin_username = "core"
     custom_data    = "${var.ignition}"
   }
 
   os_profile_linux_config {
-    disable_password_authentication = false
+    disable_password_authentication = true
   }
 
   boot_diagnostics {
     enabled     = true
     storage_uri = "${var.boot_diag_blob_endpoint}"
   }
-
-  tags = "${merge(map(
-    "Name", "${var.cluster_id}-master",
-  ), var.tags)}"
 }

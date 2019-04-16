@@ -10,16 +10,16 @@ output "public_subnet_id" {
   value = "${local.subnet_ids}"
 }
 
-output "elb_backend_pool_id" {
-  value = "${local.elb_backend_pool_id}"
+output "public_lb_backend_pool_id" {
+  value = "${azurerm_lb_backend_address_pool.master_public_lb_pool.id}"
 }
 
-output "ilb_backend_pool_id" {
-  value = "${local.ilb_backend_pool_id}"
+output "internal_lb_backend_pool_id" {
+  value = "${local.internal_lb_controlplane_pool_id}"
 }
 
-output "external_lb_id" {
-  value = "${local.external_lb_id}"
+output "public_lb_id" {
+  value = "${local.public_lb_id}"
 }
 
 output "external_lb_pip_fqdn" {
