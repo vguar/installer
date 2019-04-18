@@ -63,7 +63,8 @@ func (i *Image) Generate(p asset.Parents) error {
 	case openstack.Name:
 		osimage = "rhcos"
 	case azure.Name:
-		//TODO(serbrech): change to right image once available.
+		// For now, assumes you have this image available in your subscription,
+		// under the specified resource group and name.
 		osimage = "/resourceGroups/rhcos_images/providers/Microsoft.Compute/images/rhcostestimage"
 	case none.Name, vsphere.Name:
 	default:
