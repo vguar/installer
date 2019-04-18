@@ -36,10 +36,7 @@ resource "azurerm_availability_set" "master" {
   platform_fault_domain_count  = 3                            # the available fault domain number depends on the region, so this needs to be configurable or dynamic
 }
 
-data "azurerm_image" "image" {
-  name                = "rhcostestimage"
-  resource_group_name = "rhcos_images"
-}
+data "azurerm_subscription" "current" {}
 
 resource "azurerm_virtual_machine" "master" {
   count                 = "${var.instance_count}"
@@ -66,17 +63,20 @@ resource "azurerm_virtual_machine" "master" {
   }
 
   storage_image_reference {
-    id = "${data.azurerm_image.image.id}"
+    id = "${data.azurerm_subscription.current.id}${var.vm_image}"
   }
 
+  //we don't provide a ssh key, because it is set with ignition. 
+  //it is required to provide at least 1 auth method to deploy a linux vm
   os_profile {
     computer_name  = "${var.cluster_id}-master-${count.index}"
     admin_username = "core"
+    admin_password = "P@ssword1234!"
     custom_data    = "${var.ignition}"
   }
 
   os_profile_linux_config {
-    disable_password_authentication = true
+    disable_password_authentication = false
   }
 
   boot_diagnostics {

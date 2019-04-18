@@ -39,7 +39,7 @@ data "azurerm_storage_account_sas" "ignition" {
   }
 
   start  = "${timestamp()}"
-  expiry = "${timeadd(timestamp(), "1h")}"
+  expiry = "${timeadd(timestamp(), "24h")}"
 
   permissions {
     read    = true
@@ -107,11 +107,6 @@ resource "azurerm_network_interface_backend_address_pool_association" "internal_
 
 data "azurerm_subscription" "current" {}
 
-data "azurerm_image" "image" {
-  name                = "rhcostestimage"
-  resource_group_name = "rhcos_images"
-}
-
 resource "azurerm_virtual_machine" "bootstrap" {
   name                  = "${var.cluster_id}-bootstrap"
   location              = "${var.region}"
@@ -136,12 +131,12 @@ resource "azurerm_virtual_machine" "bootstrap" {
   }
 
   storage_image_reference {
-    id = "/subscriptions/${data.azurerm_subscription.current.id}${data.azurerm_image.image.id}"
+    id = "${data.azurerm_subscription.current.id}${var.vm_image}"
   }
 
   os_profile {
     computer_name  = "${var.cluster_id}-bootstrap-vm"
-    admin_username = "king"
+    admin_username = "core"
     admin_password = "P@ssword1234!"
     custom_data    = "${data.ignition_config.redirect.rendered}"
   }
