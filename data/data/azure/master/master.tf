@@ -1,7 +1,7 @@
 locals {
   // The name of the masters' ipconfiguration is hardcoded to "pipconfig". It needs to match cluster-api
   // https://github.com/openshift/cluster-api-provider-azure/blob/master/pkg/cloud/azure/services/networkinterfaces/networkinterfaces.go#L131
-  ip_configuration_name = "pipconfig"
+  ip_configuration_name = "pipConfig"
 }
 
 resource "azurerm_network_interface" "master" {
@@ -16,6 +16,13 @@ resource "azurerm_network_interface" "master" {
     private_ip_address_allocation = "Static"
     private_ip_address            = "${cidrhost(var.master_subnet_cidr, 5 + count.index)}" # azure reserves first 3 ip, 4th is for bootstrap VM, so we start at 5
   }
+}
+
+resource "azurerm_network_interface_nat_rule_association" "master_ssh" {
+  count                 = "${var.instance_count}"
+  network_interface_id  = "${element(azurerm_network_interface.master.*.id, count.index)}"
+  ip_configuration_name = "${local.ip_configuration_name}"
+  nat_rule_id           = "${element(var.ssh_nat_rule_ids, count.index)}"
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "master" {
