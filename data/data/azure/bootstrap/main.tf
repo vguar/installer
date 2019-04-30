@@ -1,5 +1,6 @@
 locals {
   bootstrap_nic_ip_configuration_name = "bootstrap-nic-ip"
+  ssh_nat_rule_id = "${var.ssh_nat_rule_id}"
 }
 
 resource "random_string" "storage_suffix" {
@@ -91,6 +92,12 @@ resource "azurerm_network_interface" "bootstrap" {
     private_ip_address_allocation = "Static"
     private_ip_address            = "${var.ip_address}"
   }
+}
+
+resource "azurerm_network_interface_nat_rule_association" "bootstrap_ssh" {
+  network_interface_id  = "${azurerm_network_interface.bootstrap.id}"
+  ip_configuration_name = "${local.bootstrap_nic_ip_configuration_name}"
+  nat_rule_id           = "${local.bootstrap_ssh_nat_rule_id}"
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "public_lb_bootstrap" {
