@@ -22,7 +22,7 @@ output "public_lb_id" {
   value = "${local.public_lb_id}"
 }
 
-output "external_lb_pip_fqdn" {
+output "public_lb_pip_fqdn" {
   value = "${data.azurerm_public_ip.cluster_public_ip.fqdn}"
 }
 
@@ -32,4 +32,12 @@ output "internal_lb_ip_address" {
 
 output "master_nsg_id" {
   value = "${azurerm_network_security_group.master.id}"
+}
+
+output "bootstrap_ssh_nat_rule_id" {
+  value = "${azurerm_lb_nat_rule.bootstrap_ssh.id}"
+}
+
+output "mmaster_ssh_nat_rule_ids" {
+  value = "${azurerm_lb_nat_rule.master_ssh.*.id}"
 }

@@ -27,6 +27,7 @@ module "bootstrap" {
   tags                    = "${local.tags}"
   boot_diag_blob_endpoint = "${azurerm_storage_account.bootdiag.primary_blob_endpoint}"
   ip_address              = "${local.bootstrap_ip}"
+  ssh_nat_rule_id         = "${module.vnet.bootstrap_ssh_nat_rule_id}"
 }
 
 module "vnet" {
@@ -38,6 +39,7 @@ module "vnet" {
   cluster_id          = "${var.cluster_id}"
   region              = "${var.azure_region}"
   dns_label           = "${var.cluster_id}"
+  master_count        = "${var.master_count}"
 }
 
 module "master" {
@@ -57,13 +59,14 @@ module "master" {
   instance_count          = "${var.master_count}"
   boot_diag_blob_endpoint = "${azurerm_storage_account.bootdiag.primary_blob_endpoint}"
   os_volume_size          = "${var.azure_master_root_volume_size}"
+  ssh_nat_rule_ids        = "${module.vnet.mmaster_ssh_nat_rule_ids}"
 }
 
 module "dns" {
   source                          = "./dns"
   cluster_domain                  = "${var.cluster_domain}"
   base_domain                     = "${var.base_domain}"
-  external_lb_fqdn                = "${module.vnet.external_lb_pip_fqdn}"
+  external_lb_fqdn                = "${module.vnet.public_lb_pip_fqdn}"
   internal_lb_ipaddress           = "${module.vnet.internal_lb_ip_address}"
   resource_group_name             = "${azurerm_resource_group.main.name}"
   base_domain_resource_group_name = "${var.azure_base_domain_resource_group_name}"

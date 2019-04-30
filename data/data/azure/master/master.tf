@@ -1,3 +1,9 @@
+locals{
+  // The name of the masters' ipconfiguration is hardcoded to "pipconfig". It needs to match cluster-api
+  // https://github.com/openshift/cluster-api-provider-azure/blob/master/pkg/cloud/azure/services/networkinterfaces/networkinterfaces.go#L131
+  ip_configuration_name = "pipConfig"
+}
+
 resource "azurerm_network_interface" "master" {
   count               = "${var.instance_count}"
   name                = "${var.cluster_id}-master-nic-${count.index}"
@@ -6,24 +12,31 @@ resource "azurerm_network_interface" "master" {
 
   ip_configuration {
     subnet_id                     = "${var.subnet_id}"
-    name                          = "master-${count.index}"
+    name                          = "${local.ip_configuration_name}"
     private_ip_address_allocation = "Static"
     private_ip_address            = "${cidrhost(var.master_subnet_cidr, 5 + count.index)}" # azure reserves first 3 ip, 4th is for bootstrap VM, so we start at 5
   }
+}
+
+resource "azurerm_network_interface_nat_rule_association" "master_ssh" {
+  count                 = "${var.instance_count}"
+  network_interface_id  = "${element(azurerm_network_interface.master.*.id, count.index)}"
+  ip_configuration_name = "${local.ip_configuration_name}"
+  nat_rule_id           = "${element(var.ssh_nat_rule_ids, count.index)}"
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "master" {
   count                   = "${var.instance_count}"
   network_interface_id    = "${element(azurerm_network_interface.master.*.id, count.index)}"
   backend_address_pool_id = "${var.elb_backend_pool_id}"
-  ip_configuration_name   = "master-${count.index}"                                          #must be the same as nic's ip configuration name.
+  ip_configuration_name   = "${local.ip_configuration_name}"                      #must be the same as nic's ip configuration name.
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "master_internal" {
   count                   = "${var.instance_count}"
   network_interface_id    = "${element(azurerm_network_interface.master.*.id, count.index)}"
   backend_address_pool_id = "${var.ilb_backend_pool_id}"
-  ip_configuration_name   = "master-${count.index}"                                          #must be the same as nic's ip configuration name.
+  ip_configuration_name   = "${local.ip_configuration_name}"                       #must be the same as nic's ip configuration name.
 }
 
 #TODO : make FD/UD configurable
@@ -76,7 +89,7 @@ resource "azurerm_virtual_machine" "master" {
   }
 
   os_profile_linux_config {
-    disable_password_authentication = true
+    disable_password_authentication = false
   }
 
   boot_diagnostics {

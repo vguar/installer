@@ -22,7 +22,7 @@ func TFVars(baseDomainResourceGroupName string, masterConfigs []*azureprovider.A
 	masterConfig := masterConfigs[0]
 	region := masterConfig.Location
 	cfg := &config{
-		Region:                      region,
+		Region: region,
 		BaseDomainResourceGroupName: baseDomainResourceGroupName,
 		BootstrapInstanceType:       defaults.InstanceClass(region),
 		MasterInstanceType:          masterConfig.VMSize,
