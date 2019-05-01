@@ -84,6 +84,6 @@ variable "master_subnet_cidr" {
 }
 
 variable "ssh_nat_rule_ids" {
-  type = "list"
+  type        = "list"
   description = "ssh nat rule to make the master nodes reachable"
 }

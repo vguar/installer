@@ -1,6 +1,6 @@
 locals {
   bootstrap_nic_ip_configuration_name = "bootstrap-nic-ip"
-  ssh_nat_rule_id = "${var.ssh_nat_rule_id}"
+  ssh_nat_rule_id                     = "${var.ssh_nat_rule_id}"
 }
 
 resource "random_string" "storage_suffix" {
@@ -9,6 +9,7 @@ resource "random_string" "storage_suffix" {
   special = false
 
   keepers = {
+    # Generate a new ID only when a new resource group is defined
     resource_group = "${var.resource_group_name}"
   }
 }

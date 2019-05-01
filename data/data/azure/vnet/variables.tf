@@ -48,7 +48,7 @@ variable "dns_label" {
 }
 
 variable "master_count" {
-  type = "string"
+  type        = "string"
   description = "number of masters. used to setup ssh nat rules"
-  default = "3"
+  default     = "3"
 }

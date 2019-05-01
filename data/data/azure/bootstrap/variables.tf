@@ -59,7 +59,7 @@ variable "boot_diag_blob_endpoint" {
 }
 
 variable "ssh_nat_rule_id" {
-  type = "string"
+  type        = "string"
   description = "ssh nat rule to make the bootstrap node reachable"
 }
 

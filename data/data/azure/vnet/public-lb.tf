@@ -30,6 +30,7 @@ resource "azurerm_lb" "public" {
 
 resource "azurerm_lb_nat_rule" "bootstrap_ssh" {
   resource_group_name            = "${var.resource_group_name}"
+  location                       = "${var.region}"
   name                           = "SSHBootstrap"
   protocol                       = "Tcp"
   frontend_port                  = 2200
@@ -41,9 +42,10 @@ resource "azurerm_lb_nat_rule" "bootstrap_ssh" {
 resource "azurerm_lb_nat_rule" "master_ssh" {
   count                          = "${var.master_count}"
   resource_group_name            = "${var.resource_group_name}"
+  location                       = "${var.region}"
   name                           = "SSHMaster-${count.index}"
   protocol                       = "Tcp"
-  frontend_port                  = "${count.index + 2200 + 1}"
+  frontend_port                  = "${count.index + 2201}"
   backend_port                   = 22
   frontend_ip_configuration_name = "${local.public_lb_frontend_ip_configuration_name}"
   loadbalancer_id                = "${azurerm_lb.public.id}"
