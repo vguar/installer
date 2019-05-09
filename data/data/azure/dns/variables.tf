@@ -45,6 +45,11 @@ variable "etcd_ip_addresses" {
   default     = []
 }
 
+variable "bootstrap_ip_address" {
+  description = "Bootstrap ip address"
+  type        = "string"
+}
+
 variable "resource_group_name" {
   type        = "string"
   description = "Resource group for the deployment"

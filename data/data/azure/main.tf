@@ -71,6 +71,7 @@ module "dns" {
   internal_dns_resolution_vnet_id = "${module.vnet.vnet_id}"
   etcd_count                      = "${var.master_count}"
   etcd_ip_addresses               = "${module.master.ip_addresses}"
+  bootstrap_ip_address            = "${module.bootstrap.bootstrap_ip_address}"
 }
 
 resource "random_string" "storage_suffix" {

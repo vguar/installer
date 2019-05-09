@@ -1,3 +1,7 @@
+locals{
+  api_records = "${concat(var.etcd_ip_addresses, list(var.bootstrap_ip_address))}"
+}
+
 resource "azurerm_dns_zone" "private" {
   name                           = "${var.cluster_domain}"
   resource_group_name            = "${var.resource_group_name}"
@@ -10,7 +14,7 @@ resource "azurerm_dns_a_record" "apiint_internal" {
   zone_name           = "${azurerm_dns_zone.private.name}"
   resource_group_name = "${var.resource_group_name}"
   ttl                 = 300
-  records             = ["${var.internal_lb_ipaddress}"]
+  records             = ["${local.api_records}"]
 }
 
 resource "azurerm_dns_a_record" "api_internal" {
@@ -18,7 +22,7 @@ resource "azurerm_dns_a_record" "api_internal" {
   zone_name           = "${azurerm_dns_zone.private.name}"
   resource_group_name = "${var.resource_group_name}"
   ttl                 = 300
-  records             = ["${var.internal_lb_ipaddress}"]
+  records             = ["${local.api_records}"]
 }
 
 resource "azurerm_dns_cname_record" "api_external" {

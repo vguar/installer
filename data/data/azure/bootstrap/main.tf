@@ -3,6 +3,10 @@ locals {
   ssh_nat_rule_id                     = "${var.ssh_nat_rule_id}"
 }
 
+output "bootstrap_ip_address" {
+  value = "${azurerm_network_interface.bootstrap.private_ip_address}"
+}
+
 resource "random_string" "storage_suffix" {
   length  = 5
   upper   = false
