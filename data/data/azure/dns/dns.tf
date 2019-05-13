@@ -1,5 +1,7 @@
 locals{
   api_records = "${concat(var.etcd_ip_addresses, list(var.bootstrap_ip_address))}"
+  // extracting "api.<clustername>" from <clusterdomain>
+  api_external_name = "api.${replace(var.cluster_domain, ".${var.base_domain}", "")}"
 }
 
 resource "azurerm_dns_zone" "private" {
@@ -26,7 +28,7 @@ resource "azurerm_dns_a_record" "api_internal" {
 }
 
 resource "azurerm_dns_cname_record" "api_external" {
-  name                = "api"
+  name                = "${local.api_external_name}"
   zone_name           = "${var.base_domain}"
   resource_group_name = "${var.base_domain_resource_group_name}"
   ttl                 = 300
