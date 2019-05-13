@@ -49,7 +49,7 @@ resource "azurerm_lb_rule" "internal_lb_rule_sint" {
   enable_floating_ip             = false
   idle_timeout_in_minutes        = 30
   load_distribution              = "Default"
-  probe_id                       = "${azurerm_lb_probe.internal_lb_probe_sint.id}"
+  #probe_id                       = "${azurerm_lb_probe.internal_lb_probe_sint.id}"
 }
 
 resource "azurerm_lb_probe" "internal_lb_probe_sint" {
