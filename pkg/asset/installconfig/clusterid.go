@@ -42,7 +42,8 @@ func (a *ClusterID) Generate(dep asset.Parents) error {
 	dep.Get(ica)
 
 	// add random chars to the end to randomize
-	a.InfraID = generateInfraID(ica.Config.ObjectMeta.Name)
+	//a.InfraID = generateInfraID(ica.Config.ObjectMeta.Name)
+	a.InfraID = "ocp-4-test-grwkk-rg"
 	a.UUID = uuid.New()
 	return nil
 }
@@ -67,4 +68,5 @@ func generateInfraID(base string) string {
 
 	// add random chars to the end to randomize
 	return fmt.Sprintf("%s-%s", base, utilrand.String(randomLen))
+	//return fmt.Sprintf("%s-%s", base)
 }

@@ -79,7 +79,7 @@ resource "random_string" "storage_suffix" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = "${var.cluster_id}-rg"
+  name     = "${var.cluster_id}"
   location = var.azure_region
   tags     = local.tags
 }
